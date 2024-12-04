@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Tarefas</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-family: 'Arial', sans-serif;
+        }
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .task-list {
+            margin-top: 20px;
+        }
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: white;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .task-item:hover {
+            background-color: #f8f9fa;
+        }
+        .input-group {
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+        }
+        .alert {
+            display: none;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Agenda de Tarefas</h1>
+        <p>Organize suas atividades de forma simples e eficiente</p>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Agenda de Tarefas</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showPage('home')">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showPage('sobre')">Sobre</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showPage('contatos')">Contatos</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4" id="content">
+        <div id="home">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>Adicionar Usuário e Tarefa</h3>
+                    <div class="input-group mb-3">
+                        <input type="text" id="userName" class="form-control" placeholder="Nome do Usuário" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="text" id="taskName" class="form-control" placeholder="Nome da Tarefa" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="text" id="taskDescription" class="form-control" placeholder="Descrição da Tarefa" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="datetime-local" id="taskDueDate" class="form-control" required>
+                        <div class="input-group-append">
+                            <button class="btn btn-success" onclick="addTask()"><i class="fas fa-plus"></i> Adicionar</button>
+                        </div>
+                    </div>
+                    <div id="taskFeedback" class="alert alert-info"></div>
+                    <button class="btn btn-info" onclick="saveTasks()">Salvar Tarefas</button>
+                    <div class="task-list" id="taskList">
+                        <h3>Tarefas:</h3>
+                        <ul class="list-group" id="tasks">
+                            <!-- Tarefas serão adicionadas aqui -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sobre" style="display: none;">
+            <h3>Sobre</h3>
+            <p>Esta é uma aplicação para gerenciar suas tarefas de forma eficiente. Você pode adicionar, editar, remover e salvar suas tarefas.</p>
+            <h4>Funcionalidades:</h4>
+            <ul>
+                <li>Adicionar novas tarefas com descrição e data de vencimento.</li>
+                <li>Editar tarefas existentes.</li>
+                <li>Marcar tarefas como concluídas.</li>
+                <li>Remover tarefas.</li>
+                <li>Salvar tarefas no armazenamento local do navegador.</li>
+            </ul>
+            <h4>Como Usar:</h4>
+            <p>Adicione suas tarefas e gerencie-as conforme necessário.</p>
+        </div>
+
+        <div id="contatos" style="display: none;">
+            <h3>Contatos</h3>
+            <p>Para mais informações, entre em contato pelo e-mail: <a href="mailto:gelsonhenrique122007@gmail.com">gelsonhenrique122007@gmail.com</a></p>
+            <h4>Redes Sociais:</h4>
+            <ul>
+                <li><a href="https://www.facebook.com/Gelsinho021" target="_blank">Facebook</a></li>
+                <li><a href="https://x.com/cabeloviks50641" target="_blank">Twitter</a></li>
+                <li><a href="https://www.instagram.com/og.oliver07" target="_blank">Instagram</a></li>
+            </ul>
+            <h4>Endereço:</h4>
+            <p>Rua Peixinho, 123 - Bangu, RJ -Rio de janeiro, CEP: 7997-762</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Agenda de Tarefas. Todos os direitos reservados.</p>
+    </div>
+
+    <script>
+        let tasks = [];
+
+        function showPage(page) {
+            document.getElementById('home').style.display = page === 'home' ? 'block' : 'none';
+            document.getElementById('sobre').style.display = page === 'sobre' ? 'block' : 'none';
+            document.getElementById('contatos').style.display = page === 'contatos' ? 'block' : 'none';
+        }
+
+        function addTask() {
+            const userName = document.getElementById('userName').value.trim();
+            const taskName = document.getElementById('taskName').value.trim();
+            const taskDescription = document.getElementById('taskDescription').value.trim();
+            const taskDueDate = document.getElementById('taskDueDate').value;
+            const taskFeedback = document.getElementById('taskFeedback');
+
+            if (userName !== '' && taskName !== '' && taskDescription !== '' && taskDueDate !== '') {
+                tasks.push({ user: userName, name: taskName, description: taskDescription, dueDate: taskDueDate, completed: false });
+                renderTasks();
+                taskFeedback.textContent = 'Tarefa adicionada com sucesso!';
+                taskFeedback.className = 'alert alert-success';
+                taskFeedback.style.display = 'block';
+                clearTaskInputs();
+            } else {
+                taskFeedback.textContent = 'Por favor, preencha todos os campos.';
+                taskFeedback.className = 'alert alert-danger';
+                taskFeedback.style.display = 'block';
+            }
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('tasks');
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item task-item' + (task.completed ? ' completed' : '');
+                const creationDate = new Date().toLocaleString('pt-BR');
+                li.innerHTML = `
+                    <div>
+                        <strong>${task.user}: ${task.name}</strong><br>
+                        <small>${task.description}</small><br>
+                        <span class="text-muted">Criado em: ${creationDate}</span><br>
+                        <span class="text-muted">Expira em: ${new Date(task.dueDate).toLocaleString('pt-BR')}</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-warning btn-sm" onclick="editTask(${index})"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn btn-success btn-sm" onclick="toggleComplete(${index})"><i class="fas fa-check"></i> ${task.completed ? 'Desmarcar' : 'Concluir'}</button>
+                        <button class="btn btn-danger btn-sm" onclick="removeTask(${index})"><i class="fas fa-trash-alt"></i> Remover</button>
+                    </div>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+
+        function clearTaskInputs() {
+            document.getElementById('userName').value = '';
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('taskDueDate').value = '';
+        }
+
+        function removeTask(index) {
+            tasks.splice(index, 1);
+            renderTasks();
+            const taskFeedback = document.getElementById('taskFeedback');
+            taskFeedback.textContent = 'Tarefa removida com sucesso!';
+            taskFeedback.className = 'alert alert-success';
+            taskFeedback.style.display = 'block';
+        }
+
+        function toggleComplete(index) {
+            tasks[index].completed = !tasks[index].completed;
+            renderTasks();
+        }
+
+        function editTask(index) {
+            const task = tasks[index];
+            document.getElementById('userName').value = task.user;
+            document.getElementById('taskName').value = task.name;
+            document.getElementById('taskDescription').value = task.description;
+            document.getElementById('taskDueDate').value = task.dueDate;
+            removeTask(index);
+        }
+
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            alert('Tarefas salvas com sucesso!');
+        }
+
+        function loadTasks() {
+            const savedTasks = JSON.parse(localStorage.getItem('tasks'));
+            if (savedTasks) {
+                tasks = savedTasks;
+                renderTasks();
+            }
+        }
+
+        // Carregar tarefas ao iniciar
+        window.onload = function() {
+            loadTasks();
+            showPage('home'); // Mostrar a página inicial ao carregar
+        };
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

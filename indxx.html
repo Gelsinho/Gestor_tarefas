@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Compras</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .header {
+            background-color: #28a745;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .login-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .task-list {
+            margin-top: 20px;
+        }
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: white;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .task-item:hover {
+            background-color: #f8f9fa;
+        }
+        .input-group {
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+        }
+        .alert {
+            display: none;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Lista de Compras</h1>
+        <p>Gerencie sua lista de compras facilmente.</p>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Lista de Compras</a>
+    </nav>
+
+    <div class="container mt-4" id="content">
+        <div id="home">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="login-form">
+                        <h3>Login</h3>
+                        <div class="input-group mb-3">
+                            <input type="text" id="username" class="form-control" placeholder="Usuário" required>
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="password" id="password" class="form-control" placeholder="Senha" required>
+                        </div>
+                        <button class="btn btn-primary" onclick="login()">Entrar</button>
+                        <div id="loginFeedback" class="alert alert-info mt-3"></div>
+                    </div>
+                </div>
+                <div class="col-md-8" id="shoppingListSection" style="display: none;">
+                    <div class="input-group mb-3 mt-4">
+                        <input type="text" id="itemName" class="form-control" placeholder="Nome do Item" required>
+                    </div>
+                    <div class="input-group mb-3">
+                        <button class="btn btn-success" onclick="addItem()"><i class="fas fa-plus"></i> Adicionar</button>
+                    </div>
+                    <div id="taskFeedback" class="alert alert-info"></div>
+                    <div class="task-list" id="taskList">
+                        <h3>Itens na Lista:</h3>
+                        <ul class="list-group" id="items">
+                            <!-- Itens serão adicionados aqui -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Sua Empresa. Todos os direitos reservados.</p>
+    </div>
+
+    <script>
+        let shoppingList = [];
+
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const loginFeedback = document.getElementById('loginFeedback');
+
+            if (username === 'admin' && password === 'senha') {
+                loginFeedback.textContent = 'Login bem-sucedido!';
+                loginFeedback.className = 'alert alert-success mt-3';
+                document.querySelector('.login-form').style.display = 'none';
+                document.getElementById('shoppingListSection').style.display = 'block';
+                loadShoppingList(); // Carregar lista de compras ao fazer login
+            } else {
+                loginFeedback.textContent = 'Usuário ou senha incorretos.';
+                loginFeedback.className = 'alert alert-danger mt-3';
+            }
+            loginFeedback.style.display = 'block';
+        }
+
+        function addItem() {
+            const itemName = document.getElementById('itemName').value.trim();
+            const taskFeedback = document.getElementById('taskFeedback');
+
+            if (itemName !== '') {
+                shoppingList.push({ name: itemName, completed: false });
+                renderShoppingList();
+                taskFeedback.textContent = 'Item adicionado com sucesso!';
+                taskFeedback.className = 'alert alert-success';
+                taskFeedback.style.display = 'block';
+                clearItemInput();
+            } else {
+                taskFeedback.textContent = 'Por favor, preencha o nome do item.';
+                taskFeedback.className = 'alert alert-danger';
+                taskFeedback.style.display = 'block';
+            }
+        }
+
+        function renderShoppingList() {
+            const itemList = document.getElementById('items');
+            itemList.innerHTML = '';
+            shoppingList.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item task-item' + (item.completed ? ' completed' : '');
+                li.innerHTML = `
+                    <div>
+                        <strong>${item.name}</strong>
+                    </div>
+                    <div>
+                        <button class="btn btn-warning btn-sm" onclick="toggleComplete(${index})"><i class="fas fa-check"></i> ${item.completed ? 'Desmarcar' : 'Concluir'}</button>
+                        <button class="btn btn-danger btn-sm" onclick="removeItem(${index})"><i class="fas fa-trash-alt"></i> Remover</button>
+                    </div>
+                `;
+                itemList.appendChild(li);
+            });
+        }
+
+        function clearItemInput() {
+            document.getElementById('itemName').value = '';
+        }
+
+        function removeItem(index) {
+            shoppingList.splice(index, 1);
+            renderShoppingList();
+            const taskFeedback = document.getElementById('taskFeedback');
+            taskFeedback.textContent = 'Item removido com sucesso!';
+            taskFeedback.className = 'alert alert-success';
+            taskFeedback.style.display = 'block';
+        }
+
+        function toggleComplete(index) {
+            shoppingList[index].completed = !shoppingList[index].completed;
+            renderShoppingList();
+        }
+
+        function saveShoppingList() {
+            localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+            alert('Lista de compras salva com sucesso!');
+        }
+
+        function loadShoppingList() {
+            const savedShoppingList = JSON.parse(localStorage.getItem('shoppingList'));
+            if (savedShoppingList) {
+                shoppingList = savedShoppingList;
+                renderShoppingList();
+            }
+        }
+
+        // Carregar lista de compras ao iniciar
+        window.onload = function() {
+            loadShoppingList();
+        };
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
